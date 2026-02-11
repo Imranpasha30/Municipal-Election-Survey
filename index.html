@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Municipal Election Survey - Telangana</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #FF6B35;
+            --secondary-color: #004E89;
+            --success-color: #2ECC71;
+            --error-color: #E74C3C;
+            --warning-color: #F39C12;
+            --bg-color: #F8F9FA;
+            --card-bg: #FFFFFF;
+            --text-primary: #2C3E50;
+            --text-secondary: #7F8C8D;
+            --border-color: #E1E8ED;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text-primary);
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.95;
+        }
+
+        .form-container {
+            padding: 30px;
+        }
+
+        .form-section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: var(--primary-color);
+            border-radius: 2px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        label .required {
+            color: var(--error-color);
+            margin-left: 3px;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: var(--bg-color);
+        }
+
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1);
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--bg-color);
+        }
+
+        .radio-option:hover {
+            border-color: var(--primary-color);
+            background: white;
+        }
+
+        .radio-option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            cursor: pointer;
+            accent-color: var(--primary-color);
+        }
+
+        .radio-option label {
+            margin: 0;
+            cursor: pointer;
+            flex: 1;
+            font-size: 15px;
+        }
+
+        .radio-option.selected {
+            border-color: var(--primary-color);
+            background: rgba(255, 107, 53, 0.05);
+            box-shadow: 0 2px 8px rgba(255, 107, 53, 0.2);
+        }
+
+        .location-status {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .location-status.loading {
+            background: rgba(243, 156, 18, 0.1);
+            border: 2px solid var(--warning-color);
+            color: #B8860B;
+        }
+
+        .location-status.success {
+            background: rgba(46, 204, 113, 0.1);
+            border: 2px solid var(--success-color);
+            color: #1E8449;
+        }
+
+        .location-status.error {
+            background: rgba(231, 76, 60, 0.1);
+            border: 2px solid var(--error-color);
+            color: #C0392B;
+        }
+
+        .location-status .icon {
+            font-size: 24px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 78, 137, 0.3);
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 78, 137, 0.4);
+        }
+
+        .submit-btn:disabled {
+            background: #BDC3C7;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .submit-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .error-message {
+            color: var(--error-color);
+            font-size: 13px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .success-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .success-modal.show {
+            display: flex;
+        }
+
+        .success-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            animation: scaleIn 0.3s ease;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .success-icon {
+            font-size: 80px;
+            color: var(--success-color);
+            margin-bottom: 20px;
+        }
+
+        .success-content h2 {
+            color: var(--success-color);
+            margin-bottom: 10px;
+        }
+
+        .success-content p {
+            color: var(--text-secondary);
+            margin-bottom: 25px;
+        }
+
+        .close-btn {
+            padding: 12px 30px;
+            background: var(--success-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: #27AE60;
+            transform: scale(1.05);
+        }
+
+        .loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                border-radius: 0;
+                margin: -20px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .form-container {
+                padding: 20px;
+            }
+        }
+
+        .telangana-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 16px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗳️ Municipal Election Survey</h1>
+            <p>Telangana State</p>
+            <div class="telangana-badge">2026 Municipal Elections</div>
+        </div>
+
+        <div class="form-container">
+            <form id="surveyForm">
+                <!-- Municipality Name -->
+                <div class="form-section">
+                    <div class="section-title">📍 Municipality Information</div>
+                    <div class="form-group">
+                        <label for="municipalityName">
+                            Municipality Name <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="municipalityName" 
+                            name="municipalityName" 
+                            required
+                            placeholder="Enter your municipality name"
+                        >
+                        <div class="error-message" id="municipalityError">Please enter municipality name</div>
+                    </div>
+                </div>
+
+                <!-- Voting Choice -->
+                <div class="form-section">
+                    <div class="section-title">🎯 Voting Preference</div>
+                    <div class="form-group">
+                        <label>
+                            Who will you vote for in the upcoming Municipal Election? <span class="required">*</span>
+                        </label>
+                        <div class="radio-group">
+                            <div class="radio-option" data-value="BRS">
+                                <input type="radio" id="brs" name="votingChoice" value="BRS" required>
+                                <label for="brs">BRS (Bharat Rashtra Samithi)</label>
+                            </div>
+                            <div class="radio-option" data-value="Congress">
+                                <input type="radio" id="congress" name="votingChoice" value="Congress" required>
+                                <label for="congress">Congress</label>
+                            </div>
+                            <div class="radio-option" data-value="BJP">
+                                <input type="radio" id="bjp" name="votingChoice" value="BJP" required>
+                                <label for="bjp">BJP (Bharatiya Janata Party)</label>
+                            </div>
+                            <div class="radio-option" data-value="Others">
+                                <input type="radio" id="others" name="votingChoice" value="Others" required>
+                                <label for="others">Others</label>
+                            </div>
+                        </div>
+                        <div class="error-message" id="votingError">Please select your voting preference</div>
+                    </div>
+                </div>
+
+                <!-- Reason -->
+                <div class="form-section">
+                    <div class="section-title">💭 Reason for Your Decision</div>
+                    <div class="form-group">
+                        <label for="reason">
+                            What is the main reason for your choice? <span class="required">*</span>
+                        </label>
+                        <select id="reason" name="reason" required>
+                            <option value="">-- Select a reason --</option>
+                            <option value="Local candidate performance">Local candidate performance</option>
+                            <option value="Party leadership (State / National)">Party leadership (State / National)</option>
+                            <option value="Development works in the area">Development works in the area</option>
+                        </select>
+                        <div class="error-message" id="reasonError">Please select a reason</div>
+                    </div>
+                </div>
+
+                <!-- Location Status -->
+                <div id="locationStatus" class="location-status loading">
+                    <span class="icon">📍</span>
+                    <span id="locationText">Getting your location...</span>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="submitBtn" class="submit-btn" disabled>
+                    <span id="btnText">Submit Survey</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="success-modal">
+        <div class="success-content">
+            <div class="success-icon">✅</div>
+            <h2>Thank You!</h2>
+            <p>Your survey response has been recorded successfully.</p>
+            <button class="close-btn" onclick="resetForm()">Submit Another Response</button>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_URL = 'https://inspiring-smile-production.up.railway.app'; // Change this to your backend URL
+
+        // State
+        let currentLocation = null;
+        let locationAccuracy = null;
+
+        // DOM Elements
+        const form = document.getElementById('surveyForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const locationStatus = document.getElementById('locationStatus');
+        const locationText = document.getElementById('locationText');
+        const successModal = document.getElementById('successModal');
+
+        // Radio button styling
+        document.querySelectorAll('.radio-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const radio = this.querySelector('input[type="radio"]');
+                radio.checked = true;
+
+                // Remove selected class from all options
+                document.querySelectorAll('.radio-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+
+                // Add selected class to clicked option
+                this.classList.add('selected');
+            });
+        });
+
+        // Get user location
+        async function getUserLocation() {
+            if (!navigator.geolocation) {
+                showLocationError('Geolocation is not supported by your browser');
+                return false;
+            }
+
+            try {
+                const position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(
+                        resolve,
+                        reject,
+                        {
+                            enableHighAccuracy: true,
+                            timeout: 10000,
+                            maximumAge: 0
+                        }
+                    );
+                });
+
+                currentLocation = {
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude
+                };
+                locationAccuracy = position.coords.accuracy;
+
+                showLocationSuccess();
+                return true;
+            } catch (error) {
+                showLocationError(getLocationErrorMessage(error));
+                return false;
+            }
+        }
+
+        function getLocationErrorMessage(error) {
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    return 'Location permission denied. Please enable location access.';
+                case error.POSITION_UNAVAILABLE:
+                    return 'Location information unavailable. Please try again.';
+                case error.TIMEOUT:
+                    return 'Location request timed out. Please try again.';
+                default:
+                    return 'Failed to get location. Please try again.';
+            }
+        }
+
+        function showLocationSuccess() {
+            locationStatus.className = 'location-status success';
+            locationText.textContent = `Location acquired ✓ (±${Math.round(locationAccuracy)}m accuracy)`;
+            submitBtn.disabled = false;
+        }
+
+        function showLocationError(message) {
+            locationStatus.className = 'location-status error';
+            locationText.innerHTML = `${message} <br><small>Note: Location is required to submit the survey</small>`;
+            submitBtn.disabled = true;
+        }
+
+        // Form validation
+        function validateForm() {
+            let isValid = true;
+
+            // Municipality Name
+            const municipalityName = document.getElementById('municipalityName');
+            const municipalityError = document.getElementById('municipalityError');
+            if (!municipalityName.value.trim()) {
+                municipalityError.classList.add('show');
+                isValid = false;
+            } else {
+                municipalityError.classList.remove('show');
+            }
+
+            // Voting Choice
+            const votingChoice = document.querySelector('input[name="votingChoice"]:checked');
+            const votingError = document.getElementById('votingError');
+            if (!votingChoice) {
+                votingError.classList.add('show');
+                isValid = false;
+            } else {
+                votingError.classList.remove('show');
+            }
+
+            // Reason
+            const reason = document.getElementById('reason');
+            const reasonError = document.getElementById('reasonError');
+            if (!reason.value) {
+                reasonError.classList.add('show');
+                isValid = false;
+            } else {
+                reasonError.classList.remove('show');
+            }
+
+            // Location
+            if (!currentLocation) {
+                alert('Location is required. Please allow location access and try again.');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        // Form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!validateForm()) {
+                return;
+            }
+
+            // Disable submit button
+            submitBtn.disabled = true;
+            btnText.innerHTML = '<span class="loader"></span>Submitting...';
+
+            try {
+                const formData = {
+                    municipality_name: document.getElementById('municipalityName').value.trim(),
+                    voting_choice: document.querySelector('input[name="votingChoice"]:checked').value,
+                    reason: document.getElementById('reason').value,
+                    latitude: currentLocation.latitude,
+                    longitude: currentLocation.longitude,
+                    location_accuracy: locationAccuracy
+                };
+
+                const response = await fetch(`${API_URL}/api/submit-survey`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    // Show success modal
+                    successModal.classList.add('show');
+                } else {
+                    throw new Error(result.detail || 'Failed to submit survey');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to submit survey: ' + error.message);
+                submitBtn.disabled = false;
+                btnText.textContent = 'Submit Survey';
+            }
+        });
+
+        // Reset form
+        function resetForm() {
+            form.reset();
+            successModal.classList.remove('show');
+
+            // Remove selected class from radio options
+            document.querySelectorAll('.radio-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+
+            // Reset location
+            currentLocation = null;
+            locationAccuracy = null;
+            getUserLocation();
+
+            btnText.textContent = 'Submit Survey';
+        }
+
+        // Initialize - Get location on page load
+        window.addEventListener('load', () => {
+            getUserLocation();
+        });
+
+        // Retry location button (if needed)
+        locationStatus.addEventListener('click', () => {
+            if (locationStatus.classList.contains('error')) {
+                locationStatus.className = 'location-status loading';
+                locationText.textContent = 'Getting your location...';
+                getUserLocation();
+            }
+        });
+    </script>
+</body>
+</html>
